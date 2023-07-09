@@ -30,7 +30,7 @@ const isReferenceToAnotherField = (fieldData: FieldData): boolean =>
 export const hasCircularDependency = (
   db: DB,
   field: string,
-  stack: string[] = []
+  stack: string[]
 ): boolean => {
   if (!isReferenceToAnotherField(field)) return false;
 

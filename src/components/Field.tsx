@@ -30,7 +30,9 @@ export const Field = ({ fieldData, onChange }: FieldProps) => {
   useEffect(() => setContent(fieldData), [fieldData]);
 
   const handleChanges = () => {
-    onChange(content) ? setSelected(false) : setContent(fieldData);
+    const approved = onChange(content);
+    if (!approved) setContent(fieldData);
+    setSelected(false);
   };
 
   return (

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { numberToLetter } from "../functions/numberToLetter";
 import { Field } from "./Field";
 import { IndexColumn } from "./IndexColumn";
@@ -8,6 +7,8 @@ import { UnusedField } from "./UnusedField";
 import { DB, FieldData } from "../types/db";
 
 interface SheetProps {
+  db: DB;
+  onChange: (db: DB) => void;
   columnCount: number;
   rowCount: number;
 }
@@ -40,21 +41,18 @@ export const hasCircularDependency = (
   return hasCircularDependency(db, db[targetField], [...stack, targetField]);
 };
 
-export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
-  const [db, setDB] = useState<DB>({});
-
+export const Sheet = ({ rowCount, columnCount, db, onChange }: SheetProps) => {
   const handleFieldChange = (position: string, value?: string): boolean => {
     if (value) {
       const validChange = !hasCircularDependency(db, value, [position]);
       validChange
-        ? setDB({ ...db, [position]: value })
+        ? onChange({ ...db, [position]: value })
         : alert("Error: Creating a circular dependency is not allowed");
       return validChange;
     } else if (db[position]) {
       const { [position]: _removed, ...rest } = db;
-      setDB(rest);
+      onChange(rest);
     }
-
     return true;
   };
 

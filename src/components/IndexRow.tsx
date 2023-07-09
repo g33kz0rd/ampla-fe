@@ -13,6 +13,8 @@ export const IndexRow = ({ children }: IndexRowProps) => {
         border: "solid",
         borderWidth: 1,
         background: "lightgrey",
+        cursor: "default",
+        userSelect: "none",
       }}
     >
       {children}

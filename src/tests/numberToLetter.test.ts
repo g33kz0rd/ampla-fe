@@ -1,4 +1,4 @@
-import { numberToLetter } from "./numberToLetter";
+import { numberToLetter } from "../functions/numberToLetter";
 
 describe("numberToLetter", () => {
   it("works when one letter represtantion is needed", () => {

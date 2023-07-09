@@ -14,27 +14,58 @@ interface SheetProps {
 
 const ROW_INDEX = 1;
 
+const OFFSET = 1;
+
+const getCurrentPosition = (rowIndex: number, columnIndex: number): string =>
+  `${numberToLetter(columnIndex - OFFSET)}${rowIndex + OFFSET}`;
+
+const getTargetField = (fieldData: FieldData): string => fieldData.slice(1);
+
 const isIndexColumn = (index: number): boolean => index === 0;
+
+const isReferenceToAnotherField = (fieldData: FieldData): boolean =>
+  fieldData?.startsWith("=");
+
+export const hasCircularDependency = (
+  db: DB,
+  field: string,
+  stack: string[] = []
+): boolean => {
+  if (!isReferenceToAnotherField(field)) return false;
+
+  const targetField = getTargetField(field);
+
+  if (stack.includes(targetField)) return true;
+
+  return hasCircularDependency(db, db[targetField], [...stack, targetField]);
+};
 
 export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
   const [db, setDB] = useState<DB>({});
 
-  const handleFieldChange = (position: string, value?: string) => {
-    if (value) setDB({ ...db, [position]: value });
-  };
+  const handleFieldChange = (position: string, value?: string): boolean => {
+    if (value) {
+      const validChange = !hasCircularDependency(db, value, [position]);
+      validChange
+        ? setDB({ ...db, [position]: value })
+        : alert("Error: Creating a circular dependency is not allowed");
+      return validChange;
+    } else if (db[position]) {
+      const { [position]: _removed, ...rest } = db;
+      setDB(rest);
+    }
 
-  const getCurrentPosition = (rowIndex: number, columnIndex: number): string =>
-    `${numberToLetter(columnIndex - OFFSET)}${rowIndex + OFFSET}`;
+    return true;
+  };
 
   const getFieldData = (position: string): FieldData | undefined => {
     const fieldData = db[position];
 
-    if (fieldData?.startsWith("=")) return getFieldData(fieldData.slice(1));
+    if (isReferenceToAnotherField(fieldData))
+      return getFieldData(getTargetField(fieldData));
 
     return db[position];
   };
-
-  const OFFSET = 1;
 
   return (
     <>

@@ -1,8 +1,8 @@
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import { FieldData } from "../types/db";
 
 interface FieldProps {
-  onChange: (value?: string) => void;
+  onChange: (value?: string) => boolean;
   fieldData?: FieldData;
 }
 
@@ -24,8 +24,14 @@ const inputStyle: CSSProperties = {
 
 export const Field = ({ fieldData, onChange }: FieldProps) => {
   const [selected, setSelected] = useState<boolean>(false);
-  const [content, setContent] = useState<string | undefined>(fieldData);
+  const [content, setContent] = useState<string | undefined>();
   const handleSelect = () => setSelected(true);
+
+  useEffect(() => setContent(fieldData), [fieldData]);
+
+  const handleChanges = () => {
+    onChange(content) ? setSelected(false) : setContent(fieldData);
+  };
 
   return (
     <div style={containerStyle} onClick={handleSelect}>
@@ -33,12 +39,9 @@ export const Field = ({ fieldData, onChange }: FieldProps) => {
         <input
           autoFocus
           style={inputStyle}
-          defaultValue={content}
+          value={content}
           onChange={(e) => setContent(e.target.value)}
-          onBlur={() => {
-            setSelected(false);
-            onChange(content);
-          }}
+          onBlur={handleChanges}
         />
       ) : (
         fieldData

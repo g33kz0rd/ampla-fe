@@ -5,7 +5,7 @@ import { IndexColumn } from "./IndexColumn";
 import { IndexRow } from "./IndexRow";
 import { Row } from "./Row";
 import { UnusedField } from "./UnusedField";
-import { DB } from "../types/db";
+import { DB, FieldData } from "../types/db";
 
 interface SheetProps {
   columnCount: number;
@@ -24,7 +24,17 @@ export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
   };
 
   const getCurrentPosition = (rowIndex: number, columnIndex: number): string =>
-    `${rowIndex}-${numberToLetter(columnIndex)}`;
+    `${numberToLetter(columnIndex - OFFSET)}${rowIndex + OFFSET}`;
+
+  const getFieldData = (position: string): FieldData | undefined => {
+    const fieldData = db[position];
+
+    if (fieldData?.startsWith("=")) return getFieldData(fieldData.slice(1));
+
+    return db[position];
+  };
+
+  const OFFSET = 1;
 
   return (
     <>
@@ -37,7 +47,7 @@ export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
               <UnusedField key={columnIndex} />
             ) : (
               <IndexColumn key={columnIndex}>
-                {numberToLetter(columnIndex - 1)}
+                {numberToLetter(columnIndex - OFFSET)}
               </IndexColumn>
             )
           )}
@@ -55,14 +65,16 @@ export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
                 );
 
                 return isIndexColumn(columnIndex) ? (
-                  <IndexRow key={rowIndex + 1}>{rowIndex + 1}</IndexRow>
+                  <IndexRow key={rowIndex + OFFSET}>
+                    {rowIndex + OFFSET}
+                  </IndexRow>
                 ) : (
                   <Field
                     key={currentPosition}
                     onChange={(value) =>
                       handleFieldChange(currentPosition, value)
                     }
-                    fieldData={db[currentPosition]}
+                    fieldData={getFieldData(currentPosition)}
                   />
                 );
               })}

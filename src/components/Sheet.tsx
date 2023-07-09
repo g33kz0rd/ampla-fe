@@ -34,16 +34,18 @@ export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
           .fill(undefined)
           .map((_, columnIndex) =>
             isIndexColumn(columnIndex) ? (
-              <UnusedField />
+              <UnusedField key={columnIndex} />
             ) : (
-              <IndexColumn>{numberToLetter(columnIndex - 1)}</IndexColumn>
+              <IndexColumn key={columnIndex}>
+                {numberToLetter(columnIndex - 1)}
+              </IndexColumn>
             )
           )}
       </Row>
       {Array(rowCount)
         .fill(undefined)
         .map((_, rowIndex) => (
-          <Row>
+          <Row key={rowIndex}>
             {Array(columnCount + ROW_INDEX)
               .fill(undefined)
               .map((_, columnIndex) => {

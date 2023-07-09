@@ -1,6 +1,10 @@
 import { CSSProperties, useState } from "react";
+import { FieldData } from "../types/db";
 
-interface ColumnProps {}
+interface FieldProps {
+  onChange: (value?: string) => void;
+  fieldData?: FieldData;
+}
 
 const containerStyle: CSSProperties = {
   width: 150,
@@ -18,9 +22,9 @@ const inputStyle: CSSProperties = {
   boxSizing: "border-box",
 };
 
-export const Column = ({}: ColumnProps) => {
+export const Field = ({ fieldData, onChange }: FieldProps) => {
   const [selected, setSelected] = useState<boolean>(false);
-  const [content, setContent] = useState<string>("");
+  const [content, setContent] = useState<string | undefined>(fieldData);
   const handleSelect = () => setSelected(true);
 
   return (
@@ -31,10 +35,13 @@ export const Column = ({}: ColumnProps) => {
           style={inputStyle}
           defaultValue={content}
           onChange={(e) => setContent(e.target.value)}
-          onBlur={() => setSelected(false)}
+          onBlur={() => {
+            setSelected(false);
+            onChange(content);
+          }}
         />
       ) : (
-        content
+        fieldData
       )}
     </div>
   );

@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { numberToLetter } from "../functions/numberToLetter";
-import { Column } from "./Column";
+import { Field } from "./Field";
 import { IndexColumn } from "./IndexColumn";
 import { IndexRow } from "./IndexRow";
 import { Row } from "./Row";
 import { UnusedField } from "./UnusedField";
+import { DB } from "../types/db";
 
 interface SheetProps {
   columnCount: number;
@@ -15,17 +17,26 @@ const ROW_INDEX = 1;
 const isIndexColumn = (index: number): boolean => index === 0;
 
 export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
+  const [db, setDB] = useState<DB>({});
+
+  const handleFieldChange = (position: string, value?: string) => {
+    if (value) setDB({ ...db, [position]: value });
+  };
+
+  const getCurrentPosition = (rowIndex: number, columnIndex: number): string =>
+    `${rowIndex}-${numberToLetter(columnIndex)}`;
+
   return (
     <>
       {/*Column Index */}
       <Row>
         {Array(columnCount + ROW_INDEX)
           .fill(undefined)
-          .map((_, idx) =>
-            isIndexColumn(idx) ? (
+          .map((_, columnIndex) =>
+            isIndexColumn(columnIndex) ? (
               <UnusedField />
             ) : (
-              <IndexColumn>{numberToLetter(idx - 1)}</IndexColumn>
+              <IndexColumn>{numberToLetter(columnIndex - 1)}</IndexColumn>
             )
           )}
       </Row>
@@ -35,13 +46,24 @@ export const Sheet = ({ rowCount, columnCount }: SheetProps) => {
           <Row>
             {Array(columnCount + ROW_INDEX)
               .fill(undefined)
-              .map((_, idx) =>
-                isIndexColumn(idx) ? (
-                  <IndexRow>{rowIndex + 1}</IndexRow>
+              .map((_, columnIndex) => {
+                const currentPosition = getCurrentPosition(
+                  rowIndex,
+                  columnIndex
+                );
+
+                return isIndexColumn(columnIndex) ? (
+                  <IndexRow key={rowIndex + 1}>{rowIndex + 1}</IndexRow>
                 ) : (
-                  <Column />
-                )
-              )}
+                  <Field
+                    key={currentPosition}
+                    onChange={(value) =>
+                      handleFieldChange(currentPosition, value)
+                    }
+                    fieldData={db[currentPosition]}
+                  />
+                );
+              })}
           </Row>
         ))}
     </>
